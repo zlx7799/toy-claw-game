@@ -3,17 +3,16 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 21:22:07
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-04 19:17:08
+ * @LastEditTime: 2024-03-05 17:21:07
  */
 import { PixiApp } from "./pixiApp.js";
-import { IMG_SIZE } from "./consts.js";
 // import {RigidBody} from "./rigidBody.js";
 import * as Matter from 'matter-js';
 export class RigidBodyRender {
   static instance;
-  static getInstance() {
+  static getInstance(CONFIG_SIZE) {
     if (!this.instance) {
-      this.instance = new RigidBodyRender();
+      this.instance = new RigidBodyRender(CONFIG_SIZE);
     }
     return this.instance;
   }
@@ -22,68 +21,69 @@ export class RigidBodyRender {
       this.showDebugRender();
     }
   }
-  constructor() {
+  constructor(CONFIG_SIZE) {
+    this.CONFIG_SIZE = CONFIG_SIZE;
     RigidBodyRender.instance = this;
     // 创建引擎
     this.engine = Matter.Engine.create();
     this.rigidBodies = [];
     // 创建地板
-    const groundWidth = IMG_SIZE.bgImg.width - 300;
+    const groundWidth = CONFIG_SIZE.bgImg.width - CONFIG_SIZE.hole.width;
     this.groundLeft = Matter.Bodies.rectangle(
-      groundWidth / 4,
-      IMG_SIZE.bgImg.height,
+      groundWidth / 4 + CONFIG_SIZE.holeAndRodOffset,
+      CONFIG_SIZE.bgImg.height - CONFIG_SIZE.groundHeight / 2,
       groundWidth / 2,
-      80,
+      CONFIG_SIZE.groundHeight,
       {
         isStatic: true,
         label: "groundLeft",
       }
     );
     this.groundRight = Matter.Bodies.rectangle(
-      groundWidth * 3 / 4 + 300,
-      IMG_SIZE.bgImg.height,
+      groundWidth * 3 / 4 + CONFIG_SIZE.hole.width,
+      CONFIG_SIZE.bgImg.height - CONFIG_SIZE.groundHeight / 2,
       groundWidth / 2,
-      80,
+      CONFIG_SIZE.groundHeight,
       {
         isStatic: true,
         label: "groundRight",
       }
     );
     this.leftWall = Matter.Bodies.rectangle(
-      0,
-      IMG_SIZE.bgImg.height / 2,
-      100,
-      IMG_SIZE.bgImg.height,
+      CONFIG_SIZE.wallWidth,
+      CONFIG_SIZE.bgImg.height / 2,
+      CONFIG_SIZE.wallWidth,
+      CONFIG_SIZE.bgImg.height,
       {
         isStatic: true,
         label: "leftWall",
       }
     );
     this.rightWall = Matter.Bodies.rectangle(
-      IMG_SIZE.bgImg.width,
-      IMG_SIZE.bgImg.height / 2,
-      100,
-      IMG_SIZE.bgImg.height,
+      CONFIG_SIZE.bgImg.width - CONFIG_SIZE.wallWidth / 2,
+      CONFIG_SIZE.bgImg.height / 2,
+      CONFIG_SIZE.wallWidth,
+      CONFIG_SIZE.bgImg.height,
       {
         isStatic: true,
         label: "rightWall",
       }
     );
     this.holeLeft = Matter.Bodies.rectangle(
-      IMG_SIZE.bgImg.width / 2 - 150,
-      IMG_SIZE.bgImg.height - 100,
-      50,
-      300,
+      CONFIG_SIZE.bgImg.width / 2 - CONFIG_SIZE.hole.width / 2 + CONFIG_SIZE.holeAndRodOffset + CONFIG_SIZE.wallWidth,
+      CONFIG_SIZE.bgImg.height - CONFIG_SIZE.hole.height / 2,
+      CONFIG_SIZE.wallWidth,
+      CONFIG_SIZE.hole.height,
       {
         isStatic: true,
         label: "holeLeft",
       }
     );
     this.holeRight = Matter.Bodies.rectangle(
-      IMG_SIZE.bgImg.width / 2 + 210,
-      IMG_SIZE.bgImg.height - 100,
-      50,
-      300,
+      CONFIG_SIZE.bgImg.width / 2 + CONFIG_SIZE.hole.width / 2 ,
+      CONFIG_SIZE.bgImg.height - CONFIG_SIZE.hole.height / 2,
+      CONFIG_SIZE.wallWidth,
+      CONFIG_SIZE.hole.height,
       {
         isStatic: true,
         label: "holeLeft",
@@ -98,9 +98,10 @@ export class RigidBodyRender {
    * @return {*}
    */
   showDebugRender() {
+    const {CONFIG_SIZE} = this;
     const config = {
-      width: IMG_SIZE.bgImg.width,
-      height: IMG_SIZE.bgImg.height,
+      width: CONFIG_SIZE.bgImg.width,
+      height: CONFIG_SIZE.bgImg.height,
       hasBounds: true,
       showVelocity: true,
       showAngleIndicator: true,
@@ -120,7 +121,7 @@ export class RigidBodyRender {
     //   y: -300,
     // });
     console.log('%c render.bounds', 'color: red', render.bounds, );
-    render.canvas.style.width = `${IMG_SIZE.bgImg.width}px`;
+    render.canvas.style.width = `${CONFIG_SIZE.bgImg.width}px`;
     render.canvas.style.position = "fixed";
     render.canvas.style.top = "0";
     render.canvas.style.left = "0";

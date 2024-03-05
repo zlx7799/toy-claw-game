@@ -3,7 +3,7 @@
  * @Author: zhoulx
  * @Date: 2024-03-03 12:35:43
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-04 16:24:34
+ * @LastEditTime: 2024-03-05 17:14:50
  */
 import { Claw } from "./claw.js";
 import { PixiApp } from "./pixiApp.js";
@@ -11,10 +11,11 @@ import { MACHINE_TEXTURE_DATA } from "./consts.js";
 import { Container, Sprite, Assets } from "pixi.js";
 
 export class Machine {
-  constructor() {
+  constructor(CONFIG_SIZE) {
     this._resources = null; // 预加载图片纹理
     this.claw = null; // 爪子
-    this.machineBox = new Container(); // 娃娃机内部区域 
+    this.machineBox = null; // 娃娃机内部区域 
+    this.CONFIG_SIZE = CONFIG_SIZE;
   }
   async init(){
     // console.log('%c PIXI', 'color: red', PIXI, );
@@ -54,10 +55,11 @@ export class Machine {
    * @return {*}
    */
   _renderBg(){
+    const {CONFIG_SIZE} = this;
     const texture = this._getTexture(MACHINE_TEXTURE_DATA.machineBg);
     const bg = new Sprite(texture);
-    bg.width = PixiApp.renderer.width;
-    bg.height = PixiApp.renderer.height;
+    bg.width = CONFIG_SIZE.bgImg.width;
+    bg.height = CONFIG_SIZE.bgImg.height;
     PixiApp.stage.addChild(bg);
   }
 
@@ -66,10 +68,11 @@ export class Machine {
    * @return {*}
    */
   _renderFrontBg(){
+    const {CONFIG_SIZE} = this;
     const texture = this._getTexture(MACHINE_TEXTURE_DATA.machineFront);
     const bg = new Sprite(texture);
-    bg.width = PixiApp.renderer.width;
-    bg.height = PixiApp.renderer.height;
+    bg.width = CONFIG_SIZE.bgImg.width;
+    bg.height = CONFIG_SIZE.bgImg.height;
     PixiApp.stage.addChild(bg);
   }
 
@@ -78,6 +81,8 @@ export class Machine {
    * @return {*}
    */
   _renderMachineBox(){
+    this.machineBox = new Container();
+    this.machineBox.sortableChildren = true;
     this.machineBox.position.set(0, 0);
     PixiApp.stage.addChild(this.machineBox)
   }
@@ -87,7 +92,7 @@ export class Machine {
    * @return {*}
    */
   async _renderClaw(){
-    const claw = await Claw.create();
+    const claw = await Claw.create(this.CONFIG_SIZE);
     this.claw = claw;
     this.machineBox.addChild(claw.clawContainer) 
   }

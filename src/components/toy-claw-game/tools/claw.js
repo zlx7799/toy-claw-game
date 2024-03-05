@@ -1,19 +1,22 @@
-import { IMG_SIZE, CLAW_TEXTURE_DATA } from "./consts.js";
+import { CLAW_TEXTURE_DATA } from "./consts.js";
 import { PixiApp } from "./pixiApp.js";
-import { Container, Sprite, Assets } from "pixi.js";
-import { RigidBodyRender } from "./rigidBodyRender.js";
+import { Container, Sprite, Assets, Graphics} from "pixi.js";
 // import * as decomp from "poly-decomp";
-import * as Matter from "matter-js";
+// import * as Matter from "matter-js";
 
 export class Claw {
-  constructor() {
+  constructor(CONFIG_SIZE) {
+    this.CONFIG_SIZE = CONFIG_SIZE;
     this._resources = null; // 预加载图片纹理
     this.clawContainer = new Container(); // 爪子杆部分
+    this.clawContainer.sortableChildren = true;
+    this.clawContainer.zIndex = 4
     this.claw = new Container(); // 爪子容器
     this.clawContainer.addChild(this.claw); // 将爪子添加到爪子杆中
     this.clawBody = null;
-    this._rigidBodyRender = RigidBodyRender.getInstance();
+    // this._rigidBodyRender = RigidBodyRender.getInstance();
     // 爪子的爪子的部分
+    this.judgePoint = null;
     this._leftClaw = null;
     this._rightClaw = null;
     this._leftClawBody = null;
@@ -37,8 +40,8 @@ export class Claw {
   set positionY(value) {
     this.clawContainer.position.y = value;
   }
-  static async create() {
-    const claw = new Claw();
+  static async create(CONFIG_SIZE) {
+    const claw = new Claw(CONFIG_SIZE);
     await claw.init();
     return claw;
   }
@@ -48,16 +51,18 @@ export class Claw {
     this._renderClawRod();
     this._renderLeftClaw();
     this._renderRightClaw();
+    this._renderJudgePoint();
     this.setGrabPercent(120);
     // this.isPhySicsClaw && this._buildClawBody();
   }
-
+  
   /**
    * @description: 控制爪子抓取
    * @param {*} percent 0 完全打开, 100 完全抓紧
    * @return {*}
    */
   grabTo(percent) {
+    console.log('%c percent', 'color: red', percent, );
     const fpsTime = 1000 / 60;
     return new Promise((resolve) => {
       const ticker = (delta) => {
@@ -83,8 +88,9 @@ export class Claw {
    * 将爪子移动到指定位置
    * @param position 位置
    * @param time 花费的时间 ms
+   * @param cb 移动过程的回调函数
    */
-  tweenTo(position, time = 2000) {
+  tweenTo(position, time = 2000, cb) {
     const x = position.x !== undefined ? position.x : this.positionX;
     const y = position.y !== undefined ? position.y : this.positionY;
     const speedX = (((x - this.positionX) / time) * 1000) / 60;
@@ -94,7 +100,7 @@ export class Claw {
       const ticker = () => {
         this.positionX += speedX;
         this.positionY += speedY;
-
+        cb && typeof cb == 'function' && cb(resolve, ticker)
         if (
           Math.abs(this.positionX - x) <= Math.abs(speedX) &&
           Math.abs(this.positionY - y) <= Math.abs(speedY)
@@ -109,16 +115,34 @@ export class Claw {
       PixiApp.ticker.add(ticker);
     });
   }
-
+  /**
+   * @description: 绘制判定点
+   * @return {*}
+   */
+  _renderJudgePoint(){
+    const {CONFIG_SIZE} = this;
+    let point = new Graphics();
+    point.beginFill(0x000000, 0);
+    point.drawCircle(CONFIG_SIZE.bgImg.width / 2 + CONFIG_SIZE.clawOffset.x, -CONFIG_SIZE.rodOffset.y + CONFIG_SIZE.clawRodImg.height - CONFIG_SIZE.clawOffset.y + CONFIG_SIZE.judgePointOffset, 1)
+    point.endFill();
+    this.judgePoint = point
+    // toGlobal 方法 必须手动设置下位置 才会计算
+    point.position.set(CONFIG_SIZE.bgImg.width / 2 + CONFIG_SIZE.clawOffset.x, -CONFIG_SIZE.rodOffset.y + CONFIG_SIZE.clawRodImg.height - CONFIG_SIZE.clawOffset.y + CONFIG_SIZE.judgePointOffset)
+    this.claw.addChild(this.judgePoint)
+  }
   /**
    * @description: 渲染左边爪子
    * @return {*}
    */
   _renderLeftClaw() {
+    const {CONFIG_SIZE} = this;
+
     this._leftClaw = new Sprite(this._getTexture(CLAW_TEXTURE_DATA.leftClaw));
+    this._leftClaw.width = CONFIG_SIZE.clawImg.width;
+    this._leftClaw.height = CONFIG_SIZE.clawImg.height;
     this._leftClaw.position.set(
-      IMG_SIZE.bgImg.width / 2 - IMG_SIZE.clawOffset.x + IMG_SIZE.holeAndRodOffset,
-      -IMG_SIZE.rodOffset.y + IMG_SIZE.clawRodImg.height - IMG_SIZE.clawOffset.y
+      CONFIG_SIZE.bgImg.width / 2 - CONFIG_SIZE.clawOffset.x + CONFIG_SIZE.holeAndRodOffset,
+      -CONFIG_SIZE.rodOffset.y + CONFIG_SIZE.clawRodImg.height - CONFIG_SIZE.clawOffset.y
     );
     this._leftClaw.anchor.set(0.98, 0.02);
     this.claw.addChild(this._leftClaw);
@@ -129,10 +153,13 @@ export class Claw {
    * @return {*}
    */
   _renderRightClaw() {
+    const {CONFIG_SIZE} = this;
     this._rightClaw = new Sprite(this._getTexture(CLAW_TEXTURE_DATA.rightClaw));
+    this._rightClaw.width = CONFIG_SIZE.clawImg.width;
+    this._rightClaw.height = CONFIG_SIZE.clawImg.height
     this._rightClaw.position.set(
-      IMG_SIZE.bgImg.width / 2 + IMG_SIZE.clawOffset.x + IMG_SIZE.holeAndRodOffset,
-      -IMG_SIZE.rodOffset.y + IMG_SIZE.clawRodImg.height - IMG_SIZE.clawOffset.y
+      CONFIG_SIZE.bgImg.width / 2 + CONFIG_SIZE.clawOffset.x + CONFIG_SIZE.holeAndRodOffset,
+      -CONFIG_SIZE.rodOffset.y + CONFIG_SIZE.clawRodImg.height - CONFIG_SIZE.clawOffset.y
     );
     this._rightClaw.anchor.set(0.02, 0.02);
     this.claw.addChild(this._rightClaw);
@@ -143,10 +170,13 @@ export class Claw {
    * @return {*}
    */
   _renderClawRod() {
+    const {CONFIG_SIZE} = this;
     this._rod = new Sprite(this._getTexture(CLAW_TEXTURE_DATA.suspenderRod));
+    this._rod.width = CONFIG_SIZE.clawRodImg.width;
+    this._rod.height = CONFIG_SIZE.clawRodImg.height
     this._rod.position.set(
-      IMG_SIZE.bgImg.width / 2 - IMG_SIZE.clawRodImg.width / 2 + IMG_SIZE.holeAndRodOffset,
-      -IMG_SIZE.rodOffset.y
+      CONFIG_SIZE.bgImg.width / 2 - CONFIG_SIZE.clawRodImg.width / 2 + CONFIG_SIZE.holeAndRodOffset,
+      -CONFIG_SIZE.rodOffset.y
     );
     this.clawContainer.addChild(this._rod);
   }
@@ -188,20 +218,20 @@ export class Claw {
     const rotation = (percent - 50) / 100;
 
     if (this.isPhySicsClaw) {
-      if (this.clawBody) {
-        const hasClawCollision = this._rigidBodyRender.engine.pairs.list.some(
-          (item) => {
-            return item.bodyA.label === "claw" || item.bodyB.label === "claw";
-          }
-        );
+      // if (this.clawBody) {
+      //   const hasClawCollision = this._rigidBodyRender.engine.pairs.list.some(
+      //     (item) => {
+      //       return item.bodyA.label === "claw" || item.bodyB.label === "claw";
+      //     }
+      //   );
 
-        if (hasClawCollision) {
-          // this.clawPartLeft.torque = -0.1;
-          // this.clawPartRight.torque = 0.1;
-        }
-        // Matter.Body.setAngle(this.clawPartLeft, -rotation);
-        // Matter.Body.setAngle(this.clawPartRight, rotation);
-      }
+      //   if (hasClawCollision) {
+      //     // this.clawPartLeft.torque = -0.1;
+      //     // this.clawPartRight.torque = 0.1;
+      //   }
+      //   // Matter.Body.setAngle(this.clawPartLeft, -rotation);
+      //   // Matter.Body.setAngle(this.clawPartRight, rotation);
+      // }
     } else {
       this._leftClaw.rotation = -rotation;
       this._rightClaw.rotation = rotation;
@@ -213,8 +243,8 @@ export class Claw {
    * @return {*}
    */
   /* _buildClawBody() {
-    const x = IMG_SIZE.bgImg.width / 2 + 35;
-    const y = IMG_SIZE.clawRodImg.height - 500 - 50;
+    const x = CONFIG_SIZE.bgImg.width / 2 + 35;
+    const y = CONFIG_SIZE.clawRodImg.height - 500 - 50;
 
     this.clawBody = Matter.Composite.create();
     this._clawRodBody = Matter.Bodies.rectangle(x, y, 110, 50, {
