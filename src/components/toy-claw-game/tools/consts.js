@@ -3,7 +3,7 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 19:05:21
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-05 19:27:38
+ * @LastEditTime: 2024-03-05 21:15:36
  */
 import background_img from '../../../assets/background_img.png';
 import front_img from '../../../assets/front_img.png';
@@ -45,6 +45,10 @@ export class ConfigSize {
       x: 0, // 暂时没用
       y: 500, // 杆子初始化向上偏移量
     }
+    this.prizeImg = {
+      width: 1000,
+      height: 600
+    }
     this.holeAndRodOffset = 30; // 洞口和杆子偏移量,确保爪子下去在中心
     this.groundHeight = 40;
     this.wallWidth = 40;
@@ -58,7 +62,7 @@ export class ConfigSize {
  * @return {*}
  */
   changeConfigSize (xp = 1, yp = 1){
-    const {bgImg, clawImg, ballImg, clawRodImg, clawOffset, hole, rodOffset, holeAndRodOffset, groundHeight, wallWidth, ballTop, judgePointOffset} = this;
+    const {bgImg, clawImg, ballImg, clawRodImg, clawOffset, hole, rodOffset, holeAndRodOffset, groundHeight, wallWidth, ballTop, judgePointOffset, prizeImg} = this;
     this.bgImg = {
       width: bgImg.width * xp,
       height: bgImg.height * yp
@@ -92,6 +96,10 @@ export class ConfigSize {
     this.wallWidth = wallWidth * xp;
     this.ballTop = ballTop * yp;
     this.judgePointOffset = judgePointOffset * yp;
+    this.prizeImg = {
+      width: prizeImg.width * xp,
+      height: prizeImg.height * yp,
+    }
   }
 }
 
@@ -111,34 +119,46 @@ export const CLAW_TEXTURE_DATA = {
 export const TOY_CLAW_CONFIG = {
   /** 球出现间隔 */
   ballAppearInterval: 300,
-  
-  ballCount: 6,
+  force: 0.1, // 给球的力
+  ballCount: 6, // 出现球的数量
+  prizeImgRemoveTime: 2000, // 奖品图片消失时间
   /** 彩球 */
   balls: [
     {
       image: '/img/ball1.png',
-      probability: 100, // 掉落概率 0 - 100 default:0, 值越大,在回到洞口之前掉落的几率越大, 100 的时候有极小的概率会被抓起来, 完全抓不起来是 1000
+      award: '/img/prize.jpg',
+      probability: 1, // 掉落概率 0 - 100 default:0, 值越大,在回到洞口之前掉落的几率越大, 100 的时候有极小的概率会被抓起来, 完全抓不起来是 1000
       weight: 1, // 出现权重 0 - 10 默认都是 1
   },
   {
       image: '/img/ball2.png',
+      award: '/img/prize.jpg',
       probability: 1,
+      weight: 100, // 出现权重 0 - 10 默认都是 1
   },
   {
       image: '/img/ball3.png',
+      award: '/img/prize.jpg',
       probability: 1,
+      weight: 1, // 出现权重 0 - 10 默认都是 1
   },
   {
       image: '/img/ball4.png',
+      award: '/img/prize.jpg',
       probability: 1,
+      weight: 1, // 出现权重 0 - 10 默认都是 1
   },
   {
       image: '/img/ball5.png',
+      award: '/img/prize.jpg',
       probability: 1,
+      weight: 1, // 出现权重 0 - 10 默认都是 1
   },
   {
       image: '/img/ball1.png',
+      award: '/img/prize.jpg',
       probability: 1,
+      weight: 1, // 出现权重 0 - 10 默认都是 1
   },
   ],
 
@@ -169,7 +189,6 @@ export const TOY_CLAW_CONFIG = {
    * 点击开始按钮 ,promise 返回 true 游戏才开始
    */
   onStartPlay: async () => {
-    console.log("start");
     return true;
   },
 

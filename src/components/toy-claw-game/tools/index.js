@@ -29,6 +29,7 @@ export class ToyClaw {
     const yp = this.el.clientHeight/this.CONFIG_SIZE.bgImg.height;
     this.yp = yp
     this.xp = xp
+    this.moveX = true;
     this.CONFIG_SIZE.changeConfigSize(xp, yp);
     PixiApp.renderer.resize(this.CONFIG_SIZE.bgImg.width, this.CONFIG_SIZE.bgImg.height);
     this._machine = new Machine(this.CONFIG_SIZE);
@@ -49,8 +50,14 @@ export class ToyClaw {
    * @return {*}
    */
   async _loadBallTexture() {
-    let urls = this._config.balls.map((item) => item.image);
-    const unique = (e) => Array.from(new Set(e));
+    let urls = this._config.balls.map((item) => [item.image, item.award]);
+    const unique = (e) => {
+      let array = [];
+      e.forEach((item) => {
+        array.push(...item)
+      });
+      return Array.from(new Set(array));
+    };
     urls = unique(urls);
     return await Assets.load(urls);
   }
@@ -80,7 +87,7 @@ export class ToyClaw {
 
     // 应用爪子抓取速度
     this._claw.speed = this._config.clawCatchSpeed * 3;
-
+    this.moveX = false
     await this._claw.tweenTo(
       { y: this.CONFIG_SIZE.rodOffset.y },
       65000 / this._config.clawDownSpeed,
@@ -95,24 +102,9 @@ export class ToyClaw {
             xDistance * xDistance + yDistance * yDistance
           );
           const judgeDistance = 50;
-          console.log("%c x, y", "color: red", x, y);
-          console.log(
-            "%c item.sprite.position.x",
-            "color: red",
-            item.sprite.position.x,
-            item.sprite.position.y
-          );
-          console.log(
-            "%c distance < judgeDistance",
-            "color: red",
-            distance < judgeDistance,
-            distance,
-            judgeDistance
-          );
           return distance < judgeDistance;
         });
         if (nearbyBall) {
-          console.log("%c 111", "color: red", 111);
           PixiApp.ticker.remove(ticker);
           resolve();
         }
@@ -130,11 +122,12 @@ export class ToyClaw {
       const judgeDistance = 50;
       return distance < judgeDistance;
     });
-
+    let missFlag = false;
     if (this.catchedBall) {
       console.log("%c this.catchedBall", "color: red", this.catchedBall);
       // this._config.onCatch && this._config.onCatch(this.catchedBall.id);
     } else {
+      missFlag = true;
       // 给附近的一个力
       await this._claw.grabTo(120);
       const { x, y } = this._claw.judgePoint.toGlobal(new Point(0, 0));
@@ -154,7 +147,7 @@ export class ToyClaw {
           distance < judgeDistance
         );
         if (distance < judgeDistance) {
-          const forceMagnitude = 0.5;
+          const forceMagnitude = this._config.force;
           Matter.Body.applyForce(
             item.body,
             { x: item.body.position.x, y: item.body.position.y },
@@ -165,10 +158,11 @@ export class ToyClaw {
       this._config.onMiss && this._config.onMiss();
     }
     await this._claw.tweenTo({ y: 0 }, 65000 / this._config.clawUpSpeed);
+    this.moveX = true;
     await this._claw.tweenTo({ x: 0 }, 65000 / this._config.clawBackSpeed);
-    await this._claw.grabTo(30);
+    !missFlag && await this._claw.grabTo(30);
     this.catchedBall = null;
-    await this._claw.grabTo(120);
+    !missFlag && await this._claw.grabTo(120);
     this.isClawRunning = false;
   }
 
@@ -244,10 +238,10 @@ export class ToyClaw {
         Math.floor((this.CONFIG_SIZE.bgImg.width - this.CONFIG_SIZE.hole.width) / 2) -
         this.CONFIG_SIZE.wallWidth -
         this.CONFIG_SIZE.ballImg.width / 2;
-      ballSprite.x =
-        startXList[random1] + Math.round(Math.random() * halfWidth);
+        const x = startXList[random1] + Math.round(Math.random() * halfWidth)
+      ballSprite.x = x > this.CONFIG_SIZE.bgImg.width ? this.CONFIG_SIZE.bgImg.width - 2 * this.CONFIG_SIZE.wallWidth - this.CONFIG_SIZE.ballImg.width / 2  : x
       ballSprite.y = 300 * this.yp;
-      console.log("%c ballSprite.x", "color: red", ballSprite.x, ballSprite.y);
+      // console.log("%c ballSprite.x", "color: red", ballSprite.x, ballSprite.y);
 
       this._machine.machineBox.addChild(ballSprite);
 
@@ -358,7 +352,7 @@ export class ToyClaw {
       //   CONFIG_SIZE.bgImg.width / 2 +
       //   CONFIG_SIZE.holeAndRodOffset;
       const { x, y } = this._claw.judgePoint.toGlobal(new Point(0, 0));
-      if (this._dropItem(this.catchedBall.probability)) {
+      if (this._dropItem(this.catchedBall.probability) && this.moveX) {
         this._claw.grabTo(120);
         this.catchedBall = null;
         return;
@@ -386,7 +380,27 @@ export class ToyClaw {
       return false;
     }
   }
-
+  /**
+   * @description: 检测游戏进度
+   * @return {*}
+   */
+  watchGame(url) {
+    this.isClawRunning = true;
+    let sprite = new Sprite(this._getTexture(url));
+    sprite.zIndex = 6;
+    sprite.width = this.CONFIG_SIZE.prizeImg.width
+    sprite.height = this.CONFIG_SIZE.prizeImg.height
+    sprite.x = (this.CONFIG_SIZE.bgImg.width - this.CONFIG_SIZE.prizeImg.width) / 2;
+    sprite.y = (this.CONFIG_SIZE.bgImg.height - this.CONFIG_SIZE.prizeImg.height) / 2;
+    this._machine.machineBox.addChild(sprite)
+    setTimeout(async () => {
+      this.isClawRunning = false;
+      this._machine.machineBox.removeChild(sprite)
+      if (this._rigidBodyRender.rigidBodies.length == 0){
+        await this.addBalls();
+      }
+    }, this._config.prizeImgRemoveTime);
+  }
   async _initBalls() {
     await this.addBalls();
     await this._sleep(3000);
@@ -399,11 +413,17 @@ export class ToyClaw {
 
   leftAction() {
     if (this.isClawRunning) return;
+    if (Math.abs(this._claw.positionX) > (this.CONFIG_SIZE.bgImg.width/2 - this.CONFIG_SIZE.wallWidth - this.CONFIG_SIZE.clawRodImg.width / 2)){
+      return;
+    }
     this._claw.positionX -= this._config.singleMoveDistance;
   }
 
   rightAction() {
     if (this.isClawRunning) return;
+    if (this._claw.positionX > (this.CONFIG_SIZE.bgImg.width/2 - this.CONFIG_SIZE.wallWidth  - this.CONFIG_SIZE.clawRodImg.width / 2)){
+      return;
+    }
     this._claw.positionX += this._config.singleMoveDistance;
   }
 

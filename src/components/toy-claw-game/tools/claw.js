@@ -62,7 +62,6 @@ export class Claw {
    * @return {*}
    */
   grabTo(percent) {
-    console.log('%c percent', 'color: red', percent, );
     const fpsTime = 1000 / 60;
     return new Promise((resolve) => {
       const ticker = (delta) => {

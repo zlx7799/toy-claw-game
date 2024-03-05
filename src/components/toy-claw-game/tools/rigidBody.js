@@ -3,13 +3,13 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 21:25:36
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-05 19:27:21
+ * @LastEditTime: 2024-03-05 21:15:37
  */
 import { RigidBodyRender } from "./rigidBodyRender.js";
 import * as Matter from 'matter-js';
 export class RigidBody {
   constructor(sprite, body, options) {
-    console.log('%c options', 'color: red', options, );
+    // console.log('%c options', 'color: red', options, );
     let _body = body;
     if (!body){
       _body = Matter.Bodies.rectangle(
@@ -48,10 +48,10 @@ export class RigidBody {
     this.sprite.rotation = this.body.angle;
     // console.log('%c this.body.position.y', 'color: red', cb, );
     if (typeof cb === 'function' && this.body.position.y > CONFIG_SIZE.bgImg.height) {
-      cb(this.award);
       const render = RigidBodyRender.getInstance();
       // console.log('%c render', 'color: red', render, );
       render.removeRigidBody(this._rigidBody);
+      cb(this.award);
     }
   }
 }

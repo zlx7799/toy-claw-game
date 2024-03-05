@@ -3,7 +3,7 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 21:22:07
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-05 17:21:07
+ * @LastEditTime: 2024-03-05 21:15:30
  */
 import { PixiApp } from "./pixiApp.js";
 // import {RigidBody} from "./rigidBody.js";
@@ -113,14 +113,12 @@ export class RigidBodyRender {
       engine: this.engine,
       options: config,
     });
-    console.log('%c render.bounds', 'color: red', render.bounds, );
 
     // // 平移边界
     // Matter.Bounds.translate(render.bounds, {
     //   x: -119,
     //   y: -300,
     // });
-    console.log('%c render.bounds', 'color: red', render.bounds, );
     render.canvas.style.width = `${CONFIG_SIZE.bgImg.width}px`;
     render.canvas.style.position = "fixed";
     render.canvas.style.top = "0";

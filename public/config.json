@@ -1,2 +1,49 @@
 {
+  "ballAppearInterval": 300,
+  "force": 0.1,
+  "ballCount": 6,
+  "prizeImgRemoveTime": 2000,
+  "balls": [
+    {
+      "image": "/img/ball1.png",
+      "award": "/img/prize.jpg",
+      "probability": 1,
+      "weight": 1
+    },
+    {
+      "image": "/img/ball2.png",
+      "award": "/img/prize.jpg",
+      "probability": 1,
+      "weight": 100
+    },
+    {
+      "image": "/img/ball3.png",
+      "award": "/img/prize.jpg",
+      "probability": 1,
+      "weight": 1
+    },
+    {
+      "image": "/img/ball4.png",
+      "award": "/img/prize.jpg",
+      "probability": 1,
+      "weight": 1
+    },
+    {
+      "image": "/img/ball5.png",
+      "award": "/img/prize.jpg",
+      "probability": 1,
+      "weight": 1
+    },
+    {
+      "image": "/img/ball1.png",
+      "award": "/img/prize.jpg",
+      "probability": 1,
+      "weight": 1
+    }
+  ],
+  "clawDownSpeed": 50,
+  "clawUpSpeed": 50,
+  "clawBackSpeed": 50,
+  "clawCatchSpeed": 50,
+  "singleMoveDistance": 10
 }
