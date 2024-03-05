@@ -3,7 +3,7 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 21:25:36
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-05 17:18:07
+ * @LastEditTime: 2024-03-05 19:27:21
  */
 import { RigidBodyRender } from "./rigidBodyRender.js";
 import * as Matter from 'matter-js';
@@ -21,7 +21,7 @@ export class RigidBody {
     }
     this.body = _body;
     this.sprite = sprite;
-    this.id = '';
+    this.award = '';
     this.probability = ''
     this.CONFIG_SIZE = options.configSize
     sprite.anchor.x = 0.5;
@@ -48,7 +48,7 @@ export class RigidBody {
     this.sprite.rotation = this.body.angle;
     // console.log('%c this.body.position.y', 'color: red', cb, );
     if (typeof cb === 'function' && this.body.position.y > CONFIG_SIZE.bgImg.height) {
-      cb(this.id);
+      cb(this.award);
       const render = RigidBodyRender.getInstance();
       // console.log('%c render', 'color: red', render, );
       render.removeRigidBody(this._rigidBody);

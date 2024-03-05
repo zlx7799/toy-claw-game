@@ -3,19 +3,13 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 19:05:21
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-05 17:35:28
+ * @LastEditTime: 2024-03-05 19:27:38
  */
 import background_img from '../../../assets/background_img.png';
 import front_img from '../../../assets/front_img.png';
 import suspender_rod from "../../../assets/suspender_rod.png";
 import left_hook_claw from "../../../assets/left_hook_claw.png";
 import right_hook_claw from "../../../assets/right_hook_claw.png"
-import ball1 from "../../../assets/ball1.png"
-import ball2 from "../../../assets/ball2.png"
-import ball3 from "../../../assets/ball3.png"
-import ball4 from "../../../assets/ball4.png"
-import ball5 from "../../../assets/ball5.png"
-import ball6 from "../../../assets/ball6.png"
 
 export class ConfigSize {
   constructor() {
@@ -122,36 +116,30 @@ export const TOY_CLAW_CONFIG = {
   /** 彩球 */
   balls: [
     {
-      id: 1,
-      imgUrl: ball1,
+      image: '/img/ball1.png',
       probability: 100, // 掉落概率 0 - 100 default:0, 值越大,在回到洞口之前掉落的几率越大, 100 的时候有极小的概率会被抓起来, 完全抓不起来是 1000
       weight: 1, // 出现权重 0 - 10 默认都是 1
-    },
-    {
-      id: 2,
-      imgUrl: ball2,
+  },
+  {
+      image: '/img/ball2.png',
       probability: 1,
-    },
-    {
-      id: 3,
-      imgUrl: ball3,
+  },
+  {
+      image: '/img/ball3.png',
       probability: 1,
-    },
-    {
-      id: 4,
-      imgUrl: ball4,
+  },
+  {
+      image: '/img/ball4.png',
       probability: 1,
-    },
-    {
-      id: 5,
-      imgUrl: ball5,
+  },
+  {
+      image: '/img/ball5.png',
       probability: 1,
-    },
-    {
-      id: 6,
-      imgUrl: ball6,
+  },
+  {
+      image: '/img/ball1.png',
       probability: 1,
-    },
+  },
   ],
 
   /** 爪子下降速度 1-100 default:50  */

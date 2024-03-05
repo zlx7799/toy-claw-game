@@ -49,7 +49,7 @@ export class ToyClaw {
    * @return {*}
    */
   async _loadBallTexture() {
-    let urls = this._config.balls.map((item) => item.imgUrl);
+    let urls = this._config.balls.map((item) => item.image);
     const unique = (e) => Array.from(new Set(e));
     urls = unique(urls);
     return await Assets.load(urls);
@@ -133,7 +133,7 @@ export class ToyClaw {
 
     if (this.catchedBall) {
       console.log("%c this.catchedBall", "color: red", this.catchedBall);
-      this._config.onCatch && this._config.onCatch(this.catchedBall.id);
+      // this._config.onCatch && this._config.onCatch(this.catchedBall.id);
     } else {
       // 给附近的一个力
       await this._claw.grabTo(120);
@@ -229,7 +229,7 @@ export class ToyClaw {
     let flag = true;
     for (let item of balls) {
       await this._sleep(this._config.ballAppearInterval);
-      const texture = this._getTexture(item.imgUrl);
+      const texture = this._getTexture(item.image);
       const ballSprite = new Sprite(texture);
       ballSprite.width = this.CONFIG_SIZE.ballImg.width;
       ballSprite.height = this.CONFIG_SIZE.ballImg.height;
@@ -272,8 +272,8 @@ export class ToyClaw {
       body.friction = 0.5;
 
       const rigidBody = RigidBody.create(ballSprite, body, {configSize: this.CONFIG_SIZE});
-      console.log("%c id", "color: red", item.id);
-      rigidBody.id = item.id;
+      // console.log("%c id", "color: red", item.id);
+      rigidBody.award = item.award;
       rigidBody.probability = item.probability || 0;
     }
   }
