@@ -6,5 +6,9 @@ import ToyClawGame from '@/components/toy-claw-game/ToyClawGame.vue';
   <ToyClawGame></ToyClawGame>
 </template>
 
-<style scoped>
+<style>
+body{
+  margin: 0;
+  padding: 0;
+}
 </style>

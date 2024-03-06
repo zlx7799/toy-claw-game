@@ -3,7 +3,7 @@
  * @Author: zhoulx
  * @Date: 2024-03-02 19:05:21
  * @LastEditors: zhoulx
- * @LastEditTime: 2024-03-05 21:15:36
+ * @LastEditTime: 2024-03-06 19:00:47
  */
 import background_img from '../../../assets/background_img.png';
 import front_img from '../../../assets/front_img.png';
@@ -122,6 +122,8 @@ export const TOY_CLAW_CONFIG = {
   force: 0.1, // 给球的力
   ballCount: 6, // 出现球的数量
   prizeImgRemoveTime: 2000, // 奖品图片消失时间
+  probability: 0, // 所有球抓起后的掉落概率, 单个球的掉落概率会覆盖整体的
+  catchDistance: 50, // 抓取距离判断
   /** 彩球 */
   balls: [
     {

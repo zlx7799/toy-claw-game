@@ -2,13 +2,13 @@
 import { Machine } from "./machine.js";
 import { RigidBody } from "./rigidBody.js";
 import { RigidBodyRender } from "./rigidBodyRender.js";
-import { ConfigSize, TOY_CLAW_CONFIG } from "./consts.js";
+import { ConfigSize,  } from "./consts.js";
 import { Assets, Sprite, Graphics, Point } from "pixi.js";
 import { PixiApp } from "./pixiApp.js";
 import * as Matter from "matter-js";
 
 export class ToyClaw {
-  constructor(config = TOY_CLAW_CONFIG) {
+  constructor(config ) {
     this.isClawRunning = false;
     this._claw = null;
     this._resources = null;
@@ -16,7 +16,8 @@ export class ToyClaw {
     this.randomFun = null; // 随机数方法
     this._shadowList = []; // 小球阴影
     // 不填的字段都会有默认值
-    this._config = { ...TOY_CLAW_CONFIG, ...config };
+    this._config = config;
+    console.log('%c this._config', 'color: red', this._config, );
     if (!config.el) {
       console.log("el is required");
       return;
@@ -30,6 +31,7 @@ export class ToyClaw {
     this.yp = yp
     this.xp = xp
     this.moveX = true;
+    this.missFlag = false;
     this.CONFIG_SIZE.changeConfigSize(xp, yp);
     PixiApp.renderer.resize(this.CONFIG_SIZE.bgImg.width, this.CONFIG_SIZE.bgImg.height);
     this._machine = new Machine(this.CONFIG_SIZE);
@@ -119,15 +121,15 @@ export class ToyClaw {
       const yDistance = y - item.sprite.position.y;
       const distance = Math.sqrt(xDistance * xDistance + yDistance * yDistance);
       // const judgeDistance = CONFIG_SIZE.ballImg.width / 2 + CONFIG_SIZE.judgePointOffset;
-      const judgeDistance = 50;
+      const judgeDistance = 80;
       return distance < judgeDistance;
     });
-    let missFlag = false;
+    this.missFlag = false;
     if (this.catchedBall) {
       console.log("%c this.catchedBall", "color: red", this.catchedBall);
       // this._config.onCatch && this._config.onCatch(this.catchedBall.id);
     } else {
-      missFlag = true;
+      this.missFlag = true;
       // 给附近的一个力
       await this._claw.grabTo(120);
       const { x, y } = this._claw.judgePoint.toGlobal(new Point(0, 0));
@@ -139,7 +141,7 @@ export class ToyClaw {
           xDistance * xDistance + yDistance * yDistance
         );
         // const judgeDistance = CONFIG_SIZE.ballImg.width / 2 + CONFIG_SIZE.judgePointOffset;
-        const judgeDistance = this.CONFIG_SIZE.ballImg.width;
+        const judgeDistance = this._config.catchDistance;
         console.log(
           "%c distance",
           "color: red",
@@ -160,9 +162,9 @@ export class ToyClaw {
     await this._claw.tweenTo({ y: 0 }, 65000 / this._config.clawUpSpeed);
     this.moveX = true;
     await this._claw.tweenTo({ x: 0 }, 65000 / this._config.clawBackSpeed);
-    !missFlag && await this._claw.grabTo(30);
+    !this.missFlag && await this._claw.grabTo(30);
     this.catchedBall = null;
-    !missFlag && await this._claw.grabTo(120);
+    !this.missFlag && await this._claw.grabTo(120);
     this.isClawRunning = false;
   }
 
@@ -240,7 +242,7 @@ export class ToyClaw {
         this.CONFIG_SIZE.ballImg.width / 2;
         const x = startXList[random1] + Math.round(Math.random() * halfWidth)
       ballSprite.x = x > this.CONFIG_SIZE.bgImg.width ? this.CONFIG_SIZE.bgImg.width - 2 * this.CONFIG_SIZE.wallWidth - this.CONFIG_SIZE.ballImg.width / 2  : x
-      ballSprite.y = 300 * this.yp;
+      ballSprite.y = 400 * this.yp;
       // console.log("%c ballSprite.x", "color: red", ballSprite.x, ballSprite.y);
 
       this._machine.machineBox.addChild(ballSprite);
@@ -268,7 +270,8 @@ export class ToyClaw {
       const rigidBody = RigidBody.create(ballSprite, body, {configSize: this.CONFIG_SIZE});
       // console.log("%c id", "color: red", item.id);
       rigidBody.award = item.award;
-      rigidBody.probability = item.probability || 0;
+      rigidBody.probability = item.probability ? item.probability : this._config.probability;
+      console.log('%c rigidBody.probability', 'color: red', rigidBody.probability, );
     }
   }
 
@@ -353,6 +356,7 @@ export class ToyClaw {
       //   CONFIG_SIZE.holeAndRodOffset;
       const { x, y } = this._claw.judgePoint.toGlobal(new Point(0, 0));
       if (this._dropItem(this.catchedBall.probability) && this.moveX) {
+        this.missFlag = true;
         this._claw.grabTo(120);
         this.catchedBall = null;
         return;
@@ -413,7 +417,7 @@ export class ToyClaw {
 
   leftAction() {
     if (this.isClawRunning) return;
-    if (Math.abs(this._claw.positionX) > (this.CONFIG_SIZE.bgImg.width/2 - this.CONFIG_SIZE.wallWidth - this.CONFIG_SIZE.clawRodImg.width / 2)){
+    if (this._claw.positionX < -(this.CONFIG_SIZE.bgImg.width/2 - this.CONFIG_SIZE.wallWidth - this.CONFIG_SIZE.clawRodImg.width / 2)){
       return;
     }
     this._claw.positionX -= this._config.singleMoveDistance;

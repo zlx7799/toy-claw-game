@@ -3,47 +3,42 @@
   "force": 0.1,
   "ballCount": 6,
   "prizeImgRemoveTime": 2000,
+  "probability": 100,
+  "catchDistance": 100,
+  "width": "1600px",
+  "height": "900px",
+  "left": "0px",
+  "right": "0px",
   "balls": [
     {
       "image": "/img/ball1.png",
-      "award": "/img/prize.jpg",
-      "probability": 1,
-      "weight": 1
+      "award": "/img/prize.jpg"
     },
     {
       "image": "/img/ball2.png",
-      "award": "/img/prize.jpg",
-      "probability": 1,
-      "weight": 100
+      "award": "/img/prize.jpg"
     },
     {
       "image": "/img/ball3.png",
-      "award": "/img/prize.jpg",
-      "probability": 1,
-      "weight": 1
+      "award": "/img/prize.jpg"
     },
     {
       "image": "/img/ball4.png",
-      "award": "/img/prize.jpg",
-      "probability": 1,
-      "weight": 1
+      "award": "/img/prize.jpg"
     },
     {
       "image": "/img/ball5.png",
-      "award": "/img/prize.jpg",
-      "probability": 1,
-      "weight": 1
+      "award": "/img/prize.jpg"
     },
     {
       "image": "/img/ball1.png",
       "award": "/img/prize.jpg",
-      "probability": 1,
-      "weight": 1
+      "probability": 1
     }
   ],
-  "clawDownSpeed": 50,
-  "clawUpSpeed": 50,
-  "clawBackSpeed": 50,
-  "clawCatchSpeed": 50,
-  "singleMoveDistance": 10
+  "clawDownSpeed": 100,
+  "clawUpSpeed": 100,
+  "clawBackSpeed": 100,
+  "clawCatchSpeed": 100,
+  "singleMoveDistance": 50
 }
